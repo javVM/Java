@@ -83,12 +83,15 @@ public class ControlPanel extends JPanel implements SimulatorObserver {
 		this.steps.setModel(model);
 		this.delay.setModel(model2);
 		
-
+		this.delay.setToolTipText("Change the delay value");
+		this.steps.setToolTipText("Change the number of steps");
 		this.delta.setVisible(true);
+		this.delta.setToolTipText("Change the Delta-Time value");
 		
 		
 		
 		this.filebutton.setIcon(new ImageIcon("resources\\icons\\open.png"));
+		this.filebutton.setToolTipText("Load from a txt file");
 		this.filebutton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -122,6 +125,7 @@ public class ControlPanel extends JPanel implements SimulatorObserver {
 
 
 		this.gravitybutton.setIcon(new ImageIcon("resources\\icons\\physics.png"));
+		this.gravitybutton.setToolTipText("Change the gravitational law");
 		this.gravitybutton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -158,6 +162,7 @@ public class ControlPanel extends JPanel implements SimulatorObserver {
 
 
 		this.runbutton.setIcon(new ImageIcon("resources\\Icons\\run.png"));
+		this.runbutton.setToolTipText("Run the simulation");
 		this.runbutton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -196,6 +201,7 @@ public class ControlPanel extends JPanel implements SimulatorObserver {
 
 
 		this.stopbutton.setIcon(new ImageIcon("resources\\icons\\stop.png"));
+		this.stopbutton.setToolTipText("Stop the simulation");
 		this.stopbutton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {
@@ -220,6 +226,7 @@ public class ControlPanel extends JPanel implements SimulatorObserver {
 
 
 		this.closebutton.setIcon(new ImageIcon("resources\\icons\\exit.png"));
+		this.closebutton.setToolTipText("Exit the simulator");
 		this.closebutton.addActionListener(new ActionListener(){
 			@Override
 			public void actionPerformed(ActionEvent arg0) {

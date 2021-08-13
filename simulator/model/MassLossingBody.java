@@ -31,10 +31,6 @@ public class MassLossingBody extends Body {
 	}
 	
 	public String toString() {
-		/*String body = "{ \"id\": " + this.id + ", \"mass\": " + this.mass + ", \"pos\": "
-				+ this.pos + ", \"vel\": " + this.vel + ", \"acc\": " + this.acc + ", \"freq\": " + this.lossfrecuency + ", \"factor\": " + this.lossfactor + " }";
-
-		return body;*/
 		
 		return super.toString();
 	}
