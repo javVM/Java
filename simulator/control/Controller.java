@@ -14,12 +14,40 @@ public class Controller {
 
 	private PhysicsSimulator _sim;
 	private Factory<Body> _bodiesFactory; 
-
-	public Controller()
+	private Factory<GravityLaws> gravitylaws;
+	
+	public Controller(PhysicsSimulator sim, Factory<Body> fact)
 	{
+		this._sim = sim;
+		this._bodiesFactory = fact;
 
 	}
+	
+	public Controller(PhysicsSimulator sim, Factory<Body> fact, Factory<GravityLaws> gravlaws )
+	{
+		this._sim = sim;
+		this._bodiesFactory = fact;
+		this.gravitylaws = gravlaws;
 
+	}
+	
+	
+	
+	public void reset()
+	{
+		_sim.reset();
+	}
+	
+	public void setDeltaTime(double dt)
+	{
+		_sim.setDeltaTime(dt);
+	}
+	
+	public void addObserver(SimulatorObserver o)
+	{
+		_sim.addObserver(o);
+	}
+	
 	public void loadBodies(InputStream in) {
 		JSONObject jsonInupt = new JSONObject(new JSONTokener(in));
 		JSONArray bodies = jsonInupt.getJSONArray("bodies");
@@ -31,15 +59,40 @@ public class Controller {
 	{
 		int pasos = 0;
 		PrintStream p = (out == null) ? null : new PrintStream(out);
-		String estados = "{ \"states\": [" + _sim.toString();
+		String estados = "{\"states\": [";
 		while(pasos < steps)
 		{
-			_sim.advance();
 			estados = estados + _sim.toString() + ", ";
+			_sim.advance();
 			pasos++;
 		}
-		estados = estados + "] }";
+		estados = estados + _sim.toString() + "] }";
 		p.println(estados);
 		out = p;
 	}
+	
+	public void run(int n)
+	{
+		int pasos = 0;
+		
+		
+		while(pasos < n)
+		{
+			_sim.advance();
+			pasos++;
+		}
+		
+	}
+	
+	public Factory<GravityLaws> getGravityLawsFactory()
+	{
+		return this.gravitylaws;
+	}
+	
+	public void setGravityLaws(JSONObject info)
+	{
+		_sim.setGravityLaws(gravitylaws.createInstance(info));
+	}
+	
+	
 }

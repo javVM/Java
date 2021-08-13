@@ -20,5 +20,10 @@ public class FallingToCenterGravity implements GravityLaws{
 		}
 		
 	}
+	
+	public String toString()
+	{
+		return "Falling to center gravity";
+	}
 
 }

@@ -22,6 +22,7 @@ public class NewtonUniversalGravitation implements GravityLaws {
 
 		double fij;
 		Vector Fij;
+		Vector Fi = new Vector(2);
 
 		for(Body bi: bodies)
 		{
@@ -37,14 +38,24 @@ public class NewtonUniversalGravitation implements GravityLaws {
 				{
 					if(bi != bj)
 					{
-						fij = G * ((bi.getMass() * bj.getMass())/(Math.pow(Math.abs(bi.getPosition().distanceTo(bj.getPosition())) , 2))); 
-						Fij = bi.pos.minus(bj.pos).direction().scale(fij);
-						bi.setAcceleration(Fij.scale(1/bi.getMass()));
+						fij = G * ((bi.getMass() * bj.getMass())/(Math.pow(bj.getPosition().distanceTo(bi.getPosition()) , 2))); 
+						Fij = bj.getPosition().minus(bi.getPosition()).direction().scale(fij);
+						Fi = Fi.plus(Fij);
 					}
 				}
+				
+				bi.setAcceleration(Fi.scale(1/bi.getMass()));
+				Fi = new Vector(2);
+				
+				
 			}
 		}
 
+	}
+	
+	public String toString()
+	{
+		return "Newton's Universal Gravitation";
 	}
 
 

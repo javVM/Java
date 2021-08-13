@@ -20,10 +20,9 @@ public class BasicBodyBuilder extends Builder<Body> {
 		double m = data.getDouble("mass");
 		double[] p = jsonArrayTodoubleArray(data.getJSONArray("pos"));
 		double[] v = jsonArrayTodoubleArray(data.getJSONArray("vel"));
-		double[] a = jsonArrayTodoubleArray(data.getJSONArray("acc"));
 		Vector velocity = new Vector(v);
 		Vector position = new Vector(p);
-		Vector acceleration = new Vector(a);
+		Vector acceleration = new Vector(2);
 
 		return new Body(id, velocity, acceleration , position, m );
 	}

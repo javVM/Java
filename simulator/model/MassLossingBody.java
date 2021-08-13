@@ -23,7 +23,7 @@ public class MassLossingBody extends Body {
 			
 			if(c>= this.lossfrecuency)
 			{
-				this.mass = (this.mass * (1 - this.lossfactor));
+				setMass(super.getMass() * (1 - this.lossfactor));
 				c = 0.0;
 			}
 			
@@ -31,10 +31,12 @@ public class MassLossingBody extends Body {
 	}
 	
 	public String toString() {
-		String body = "{ \"id\": " + this.id + ", \"mass\": " + this.mass + ", \"pos\": "
+		/*String body = "{ \"id\": " + this.id + ", \"mass\": " + this.mass + ", \"pos\": "
 				+ this.pos + ", \"vel\": " + this.vel + ", \"acc\": " + this.acc + ", \"freq\": " + this.lossfrecuency + ", \"factor\": " + this.lossfactor + " }";
 
-		return body;
+		return body;*/
+		
+		return super.toString();
 	}
 
 

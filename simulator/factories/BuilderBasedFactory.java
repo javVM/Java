@@ -8,31 +8,30 @@ import org.json.JSONObject;
 public class BuilderBasedFactory<T> implements Factory<T>{
 
 	private List<Builder<T>> _builders;
-	private List<JSONObject> _factoryElements;
 	
 	public BuilderBasedFactory(List<Builder<T>> builders)
 	{
 		this._builders = new ArrayList<>(builders);
-		for(Builder<?> b: builders)
-		{
-			this._factoryElements.add(b.getBuilderInfo());
-		}
-	}
+	}	
 	
 	public T createInstance(JSONObject info) throws IllegalArgumentException{
 		
-			for(Builder<?> b: _builders)
+		try
+		{
+			for(Builder<T> b: _builders)
 			{
 				if(b.createInstance(info) !=  null)
 				{
 					return (T) b.createInstance(info);
+					
 				}
-				else
-				{
-					throw new IllegalArgumentException();
-				}
+				
 			}
-		
+		}
+		catch(IllegalArgumentException ex)
+		{
+			throw new IllegalArgumentException("Cannot create instance");
+		}
 		return null;
 		
 	}
@@ -40,8 +39,16 @@ public class BuilderBasedFactory<T> implements Factory<T>{
 	@Override
 	public  List<JSONObject> getInfo() {
 
-		return this._factoryElements;
+		List<JSONObject> _factoryElements = new ArrayList<JSONObject>();
+		
+		for(Builder<?> b: this._builders)
+		{
+			_factoryElements.add(b.getBuilderInfo());
+		}
+		
+		return  _factoryElements;
 		
 	}
+
 
 }

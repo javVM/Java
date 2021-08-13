@@ -1,6 +1,12 @@
 package simulator.launcher;
 
+import java.io.FileInputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.util.ArrayList;
+
+import javax.swing.SwingUtilities;
 
 /*
  * Examples of command-line parameters:
@@ -25,20 +31,25 @@ import simulator.factories.BasicBodyBuilder;
 import simulator.factories.Factory;
 import simulator.factories.MassLosingBodyBuilder;
 import simulator.model.*;
+import simulator.view.MainWindow;
+import simulator.control.Controller;
 import simulator.factories.*;
 
 
 public class Main {
 
 	// default values for some parameters
-	//
+	private final static Integer STEPS = 150;
 	private final static Double _dtimeDefaultValue = 2500.0;
 
 	// some attributes to stores values corresponding to command-line parameters
 	//
 	private static Double _dtime = null;
 	private static String _inFile = null;
+	private static String _outFile = null;
 	private static JSONObject _gravityLawsInfo = null;
+	private static Integer _STEPS = null;
+	private static  String mode = null;
 
 	// factories
 	private static Factory<Body> _bodyFactory;
@@ -47,16 +58,21 @@ public class Main {
 	private static void init() {
 		// initialize the bodies factory
 		// ...
-		
+
 		ArrayList<Builder<Body>> bodyBuilders = new ArrayList<>();
 		bodyBuilders.add(new BasicBodyBuilder());
 		bodyBuilders.add(new MassLosingBodyBuilder());
+		ArrayList<Builder<GravityLaws>> lawBuilders = new ArrayList<>();
+		lawBuilders.add(new NewtonUniversalGravitationBuilder());
+		lawBuilders.add(new FallingToCenterGravityBuilder());
+		lawBuilders.add(new NoGravityBuilder());
 		_bodyFactory = new BuilderBasedFactory<Body>(bodyBuilders);
-		
+		_gravityLawsFactory = new BuilderBasedFactory<GravityLaws>(lawBuilders);
+
 
 		// initialize the gravity laws factory
 		// ...
-		
+
 		ArrayList<Builder<GravityLaws>> gravityLawsBuilders = new ArrayList<>();
 		gravityLawsBuilders.add(new NewtonUniversalGravitationBuilder());
 		gravityLawsBuilders.add(new FallingToCenterGravityBuilder());
@@ -76,7 +92,10 @@ public class Main {
 		try {
 			CommandLine line = parser.parse(cmdLineOptions, args);
 			parseHelpOption(line, cmdLineOptions);
+			parseModeOption(line);
 			parseInFileOption(line);
+			parseOutFileOption(line);
+			parseStepsOption(line);
 			parseDeltaTimeOption(line);
 			parseGravityLawsOption(line);
 
@@ -98,14 +117,46 @@ public class Main {
 
 	}
 
+	private static void parseStepsOption(CommandLine line) throws ParseException{
+		String steps = line.getOptionValue("s", STEPS.toString());
+		try
+		{
+			_STEPS = Integer.parseInt(steps);
+			assert(_STEPS > 0);
+		}
+		catch(Exception e)
+		{
+			throw new ParseException("Value of steps is not valid:" + steps);
+		}
+	}
+
+	private static void parseOutFileOption(CommandLine line)  throws ParseException {
+		_outFile = line.getOptionValue("o");
+		if (_outFile == null && mode.equals("batch")) {
+			throw new ParseException("An output file of bodies is required");
+		}
+	}
+
 	private static Options buildOptions() {
 		Options cmdLineOptions = new Options();
+
+
 
 		// help
 		cmdLineOptions.addOption(Option.builder("h").longOpt("help").desc("Print this message.").build());
 
 		// input file
 		cmdLineOptions.addOption(Option.builder("i").longOpt("input").hasArg().desc("Bodies JSON input file.").build());
+
+		//mode
+		cmdLineOptions.addOption(Option.builder("m").longOpt("mode").hasArg().desc(" Execution Mode. Possible values: ’batch’\r\n" + 
+				"(Batch mode), ’gui’ (Graphical User Interface mode). Default value: ’batch’.").build());
+
+		//output file
+		cmdLineOptions.addOption(Option.builder("o").longOpt("output").hasArg().desc("Bodies JSON output file.").build());
+
+		//steps
+		cmdLineOptions.addOption(Option.builder("s").longOpt("steps").hasArg().desc("Sequency count of steps. default value:" + STEPS ).build());
 
 		// delta-time
 		cmdLineOptions.addOption(Option.builder("dt").longOpt("delta-time").hasArg()
@@ -146,7 +197,7 @@ public class Main {
 
 	private static void parseInFileOption(CommandLine line) throws ParseException {
 		_inFile = line.getOptionValue("i");
-		if (_inFile == null) {
+		if (_inFile == null && mode.equals("batch")){
 			throw new ParseException("An input file of bodies is required");
 		}
 	}
@@ -159,6 +210,14 @@ public class Main {
 		} catch (Exception e) {
 			throw new ParseException("Invalid delta-time value: " + dt);
 		}
+	}
+
+	private static void parseModeOption(CommandLine line) throws ParseException {
+		mode = line.getOptionValue("m");
+		if (mode != null && (!mode.equals("batch") && (!mode.equals("gui"))) || mode == null) {
+			throw new ParseException("A valid mode is required");
+		}
+
 	}
 
 	private static void parseGravityLawsOption(CommandLine line) throws ParseException {
@@ -184,11 +243,50 @@ public class Main {
 
 	private static void startBatchMode() throws Exception {
 		// create and connect components, then start the simulator
+		GravityLaws gravityLaw =  _gravityLawsFactory.createInstance(_gravityLawsInfo);
+		PhysicsSimulator sim = new PhysicsSimulator(_dtime, gravityLaw);
+		InputStream is = new FileInputStream(_inFile);
+		OutputStream os = (_outFile == null)? System.out: new PrintStream(_outFile);
+		Controller ctr1 = new Controller(sim, _bodyFactory);
+		ctr1.loadBodies(is);
+		ctr1.run(_STEPS, os);
 	}
+
+	private static void startGUIMode() throws Exception {
+		GravityLaws gravityLaw =  _gravityLawsFactory.createInstance(_gravityLawsInfo);
+		PhysicsSimulator sim = new PhysicsSimulator(_dtime, gravityLaw);
+		Controller ctrl = new Controller(sim, _bodyFactory, _gravityLawsFactory);
+		
+		if(_inFile != null)
+		{
+			InputStream is = new FileInputStream(_inFile);
+			ctrl.loadBodies(is);
+		}
+	
+	
+	
+		SwingUtilities.invokeAndWait(new Runnable() {
+			@Override
+			
+			public void run() {
+			new MainWindow(ctrl);
+			}
+			});
+
+	}
+
 
 	private static void start(String[] args) throws Exception {
 		parseArgs(args);
-		startBatchMode();
+		if(mode.equals("batch") || mode == null)
+		{
+			startBatchMode();
+		}
+		else if(mode.equals("gui"))
+		{
+			startGUIMode();
+		}
+	
 	}
 
 	public static void main(String[] args) {

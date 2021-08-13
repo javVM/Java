@@ -21,12 +21,11 @@ public class MassLosingBodyBuilder extends Builder<Body> {
 		double m = data.getDouble("mass");
 		double[] p = jsonArrayTodoubleArray(data.getJSONArray("pos"));
 		double[] v = jsonArrayTodoubleArray(data.getJSONArray("vel"));
-		double[] a = jsonArrayTodoubleArray(data.getJSONArray("acc"));
 		double freq = data.getDouble("freq");
 		double fac = data.getDouble("factor");	
 		Vector velocity = new Vector(v);
 		Vector position = new Vector(p);
-		Vector acceleration = new Vector(a);
+		Vector acceleration = new Vector(2);
 
 		return new MassLossingBody(id, velocity, acceleration , position, m , freq, fac);
 	}
@@ -38,7 +37,6 @@ public class MassLosingBodyBuilder extends Builder<Body> {
 		data.put("mass", "the mass");
 		data.put("pos", "the position vector");
 		data.put("vel", "the velocity vector");
-		data.put("acc", "the acceleration vector");
 		data.put("freq", "the frequency");
 		data.put("factor", "the mass loss factor");
 
